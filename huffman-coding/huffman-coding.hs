@@ -86,7 +86,7 @@ showBin n = Numeric.showIntAtBase 2 Char.intToDigit n ""
 parse :: Map.Map String Char -> String -> Maybe String
 parse m x = fmap init
   . fst
-  . until' (fmap (elem eof) . fst)
+  . until (elem eof . Maybe.fromMaybe "" . fst)
     (\(a, b) -> let (c, d) = parse'' b in ((\a b -> a ++ [b]) <$> a <*> c, d))
   $ (Just "", x)
   where parse'' = parse' m
@@ -95,13 +95,6 @@ parse' :: Map.Map String Char -> String -> (Maybe Char, String)
 parse' m x = (\(a, b) -> (Map.lookup a m, b))
   . until ((`Map.member` m) . fst) (\(a, b) -> (a ++ [head b], tail b))
   $ ("", x)
-
-until' :: (a -> Maybe Bool) -> (a -> a) -> a -> a
-until' p f = go
-  where
-    go x = case p x of
-      Just True -> x
-      _ -> go (f x)
 
 main = do
   input <- getContents
